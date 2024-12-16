@@ -9,6 +9,7 @@ float Shift = 2 * pi / TotalNumberofServos;  // Phase lag between segments
 float Wavelengths, rads;
 int InteriorAngle, SetpointAngle, MaxAngleDisplacement;
 int mode = 0;
+int ButtonPin = 3;
 
 
 void setup() {
@@ -25,105 +26,10 @@ void setup() {
   myServos[7].attach(9);
   myServos[8].attach(10);
   
-  pinMode(3,INPUT);
-  //Initialise snake in a straight line
-  //for(int i=0; i<10; i++){
-  //  myServos[i].write(90);
-  //  delay(15);
-  //}
+  pinMode(ButtonPin,INPUT);
   delay(1000);
 }
 
-void straightline() {
-  Serial.println("hola");
-  for (int i = 0; i < 10; i++) {
-    myServos[i].write(180);
-    delay(100);
-  }
-}
-
-void Cshape() {
-  for (int i = 0; i < 10; i++) {
-    myServos[i].write(60);
-    delay(100);
-  }
-}
-
-void ubend() {
-  for (int i = 0; i < 10; i++) {
-    if (i == 4 or i == 5) {
-      myServos[i].write(0);
-      delay(100);
-    } else {
-      myServos[i].write(90);
-      delay(100);
-    }
-  }
-}
-
-void ring() {
-  InteriorAngle = 180 - 360 / (TotalNumberofServos + 1);  //general formula for a polygon with 3 or more vertices, +1 vertice between tail and head segment
-  SetpointAngle = abs(InteriorAngle - 90);                //Offset the angle from the initial position of 90 degrees.
-  for (int i = 0; i < 10; i++) {
-    myServos[i].write(SetpointAngle);
-    delay(100);
-  }
-}
-
-
-void slither(int offset, int Amplitude, int Speed, float Wavelengths) {
-  MaxAngleDisplacement = abs(offset) + abs(Amplitude);  //amount servo can rotate from the SetpointAngle without going out of the [0,180] degree range
-  while (MaxAngleDisplacement > 90) {                   //prevents a setpoint angle outside the rage of[0,180]
-    Amplitude = abs(Amplitude) - 1;
-    MaxAngleDisplacement = abs(offset) + Amplitude;
-  }
-  for (int i = 0; i < 360; i++) {
-    rads = i * pi / 180.0;  //convert from degrees to radians
-    for (int j = 0; j < 10; j++) {
-      myServos[j].write(90 + offset);  //+Amplitude*sin(Speed*rads+j*Wavelengths*Shift));
-    }
-    delay(10);
-  }
-}
-
-void staticWave(int offset, int Amplitude, float Wavelengths) {
-  MaxAngleDisplacement = abs(offset) + abs(Amplitude);  //amount servo can rotate from the SetpointAngle without going out of the [0,180] degree range
-  while (MaxAngleDisplacement > 90) {                   //prevents a setpoint angle outside the rage of[0,180]
-    Amplitude = abs(Amplitude) - 1;
-    MaxAngleDisplacement = abs(offset) + Amplitude;
-  }
-
-  for (int j = 0; j < 10; j++) {
-    myServos[j].write(90 + offset + Amplitude * sin(j * Wavelengths * Shift));
-    delay(15);
-  }
-}
-
-void InchWorm() {
-  for (int pos = 0; pos < 45; pos += 1) {
-    myServos[0].write(90 - pos);
-    myServos[1].write(90 + 2 * pos);
-    myServos[2].write(90 - pos);
-    delay(10);
-  }
-
-  for (int i = 0; i < 7; i += 1) {
-    for (int pos = 0; pos < 45; pos += 1) {
-      myServos[i].write(45 + pos);
-      myServos[i + 1].write(180 - 3 * pos);
-      myServos[i + 2].write(45 + 3 * pos);
-      myServos[i + 3].write(90 - pos);
-      delay(10);
-    }
-  }
-
-  for (int pos = 0; pos < 45; pos += 1) {
-    myServos[7].write(45 + pos);
-    myServos[8].write(180 - 2 * pos);
-    myServos[9].write(45 + pos);
-    delay(10);
-  }
-}
 
 int add = 23;
 int sub = -20;
@@ -181,7 +87,7 @@ void synchro_walk() {
 }
 int buttonState = 0;
 void loop() {
-  buttonState = digitalRead(3);
+  buttonState = digitalRead(ButtonPin);
 
   if (buttonState == HIGH) {
     mode = mode ^ 1;
@@ -197,15 +103,4 @@ void loop() {
     synchro_walk();
   }
 
-  
-
-
-
-
-
-
-
-
-
-  //delay(100);
 }
